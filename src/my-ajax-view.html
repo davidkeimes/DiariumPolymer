@@ -1,0 +1,50 @@
+<link rel="import" href="../bower_components/polymer/polymer-element.html">
+<link rel="import" href="../bower_components/iron-ajax/iron-ajax.html">
+<script src="./models/journal.js"></script>
+
+<dom-module id="my-ajax-view">
+  <!-- Defines the element's style and local DOM -->
+  <template>
+    <style>
+      :host {
+        display: block;
+        padding: 16px;
+      }
+    </style>
+
+    <iron-ajax
+        auto
+        url="http://127.0.0.1:3000/journals"
+        handle-as="json"
+        on-response="handleResponse"
+        debounce-duration="300"></iron-ajax>
+    
+    <div class="card" id="ajax-content">Journals</h1>
+        <template is="dom-repeat" items="{{journals}}">
+            <div># [[index]]</div>
+            <div>Journal ID: [[item._id]]</span></div>
+            <div>Journal name: [[item.name]]</span></div>
+            <div>Journal img_url: [[item.img_url]]</span></div>
+            <img src="[[item.img_url]]" />
+            <div>Journal created_date: [[item.created_date]]</span></div>
+        </template>
+  </template>
+  <script>
+    // Your new element extends the Polymer.Element base class
+    class MyAjaxView extends Polymer.Element {
+      static get is() { return 'my-ajax-view'; }
+      static get properties() {
+        return {
+            journals: { type: Array }
+        }
+      }
+
+      handleResponse(data) {
+        this.journals = data.detail.response;
+      }
+    }
+
+    //Now, register your new custom element so the browser can use it
+    customElements.define(MyAjaxView.is, MyAjaxView);
+  </script>
+</dom-module>
