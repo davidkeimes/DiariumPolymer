@@ -15,8 +15,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     <meta name="generator" content="Polymer Starter Kit">
     <meta name="viewport" content="width=device-width, minimum-scale=1, initial-scale=1, user-scalable=yes">
 
-    <title>My App</title>
-    <meta name="description" content="My App description">
+    <title>Diarium</title>
+    <meta name="description" content="Diarum description">
 
     <!--
       If deploying to a non-root path, replace href="/" with the full path to the project root.
@@ -62,6 +62,13 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         window.addEventListener('load', function() {
           navigator.serviceWorker.register(baseUrl + 'service-worker.js');
         });
+      }
+    </script>
+
+    <!-- Setup global App Config -->
+    <script>
+      window.appConfig = {
+        apiEndpoint: 'http://127.0.0.1:3000',
       }
     </script>
 
