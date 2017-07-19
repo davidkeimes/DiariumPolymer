@@ -1,4 +1,5 @@
 <link rel="import" href="../../bower_components/polymer/polymer-element.html">
+<link rel="import" href="../app-components/my-entry-list.html">
 <link rel="import" href="../shared-styles.html">
 
 <dom-module id="my-journal-view">
@@ -11,28 +12,7 @@
       }
     </style>
 
-    <app-route
-      route="{{route}}"
-      pattern="/:journal_id"
-      data="{{routeData}}">
-    </app-route>
-
-    <iron-ajax
-      auto
-      url="[[apiEndpoint]]/entries/journal/{{routeData.journal_id}}"
-      handle-as="json"
-      on-response="handleEntryListResponse"
-      debounce-duration="300">
-    </iron-ajax>
-
-    <div class="card">
-      <template is="dom-repeat" items="{{entries}}">
-        <div>
-          <span>[[item.name]]</span>
-          <span>[[item.content]]</span>
-        </div>
-      </template>   
-    </div>
+    <my-entry-list entries="{{entries}}"></my-entry-list>
   </template>
 
   <script>
@@ -41,18 +21,8 @@
 
       static get properties() {
         return {
-          apiEndpoint: {
-            type: String,
-            value: appConfig.apiEndpoint
-          },
-          route: Object,
-          routeData: Object,
           entries: Array
         };
-      }
-
-      handleEntryListResponse(data) {
-        this.entries = data.detail.response;
       }
     }
 

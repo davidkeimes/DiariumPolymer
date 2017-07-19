@@ -17,22 +17,14 @@
       data="{{routeData}}">
     </app-route>
 
-    <iron-ajax
-      auto
-      url="[[apiEndpoint]]/journals"
-      handle-as="json"
-      on-response="handleJournalListResponse"
-      debounce-duration="300">
-    </iron-ajax>
-
-  <template is="dom-repeat" items="{{journals}}">
-    <a name="journal" href="journal/[[item._id]]">
-      <div class="card">
-        <p>[[item.name]]</p>
-        <p>[[item.content]]</p>
-      </div>
-    </a>
-  </template>
+    <template is="dom-repeat" items="{{journals}}">
+      <a name="journal" href="journal/[[item._id]]">
+        <div class="card">
+          <p>[[item.name]]</p>
+          <p>[[item.content]]</p>
+        </div>
+      </a>
+    </template>
   
   </template>
 
@@ -42,18 +34,10 @@
 
       static get properties() {
         return {
-          apiEndpoint: {
-            type: String,
-            value: appConfig.apiEndpoint
-          },
           route: Object,
           routeData: Object,
-          journals: Array
+          journals: Array,
         }
-      }
-
-      handleJournalListResponse(data) {
-        this.journals = data.detail.response;
       }
     }
 

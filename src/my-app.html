@@ -20,6 +20,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="../bower_components/iron-pages/iron-pages.html">
 <link rel="import" href="../bower_components/iron-selector/iron-selector.html">
 <link rel="import" href="../bower_components/paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../bower_components/paper-button/paper-button.html">
+<link rel="import" href="../bower_components/paper-dialog/paper-dialog.html">
+<link rel="import" href="../bower_components/paper-input/paper-input.html">
+<link rel="import" href="../bower_components/iron-image/iron-image.html">
 <link rel="import" href="my-icons.html">
 
 <link rel="import" href="../bower_components/iron-ajax/iron-ajax.html">
@@ -36,24 +40,19 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
         display: block;
       }
-
       app-drawer-layout:not([narrow]) [drawer-toggle] {
         display: none;
       }
-
       app-header {
         color: #fff;
         background-color: var(--app-primary-color);
       }
-
       app-header paper-icon-button {
         --paper-icon-button-ink-color: white;
       }
-
       .drawer-list {
         margin: 0 20px;
       }
-
       .drawer-list a {
         display: block;
         padding: 0 16px;
@@ -61,10 +60,17 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         color: var(--app-secondary-color);
         line-height: 40px;
       }
-
       .drawer-list a.iron-selected {
         color: black;
         font-weight: bold;
+      }
+      .app-header-link {
+        color: #fff;
+        text-decoration: none;
+      }
+      #logo {
+        margin-top: 2em;
+        cursor: pointer;
       }
     </style>
 
@@ -76,20 +82,73 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       data="{{routeData}}"
       tail="{{subroute}}">
     </app-route>
+    
+    <iron-ajax
+      auto
+      url="[[apiEndpoint]]/journals"
+      handle-as="json"
+      on-response="handleJournalListResponse"
+      debounce-duration="300">
+    </iron-ajax>
+
+    <iron-ajax
+      id="ajaxEntriesRequest"
+      url="[[apiEndpoint]]/entries/journal{{subroute.path}}"
+      handle-as="json"
+      on-response="handleEntryListResponse"
+      debounce-duration="300">
+    </iron-ajax>
+
+    <iron-ajax
+      id="ajaxEntryRequest"
+      handle-as="json"
+      on-response="handleEntryResponse"
+      debounce-duration="300">
+    </iron-ajax>
+
+    <iron-ajax
+      id="ajaxSaveEntryRequest"
+      method="PUT"
+      content-type="application/json"
+      handle-as="json"
+      on-response="handleSaveEntryResponse"
+      debounce-duration="300">
+    </iron-ajax>
+
+    <iron-ajax
+      id="ajaxAddJournalRequest"
+      method="POST" 
+      content-type="application/json"
+      url="[[apiEndpoint]]/journals"
+      handle-as="json"
+      on-response="handleAddJournalResponse"
+      debounce-duration="300">
+    </iron-ajax>
+
+    <iron-ajax
+      id="ajaxAddEntryRequest"
+      method="POST" 
+      content-type="application/json"
+      url="[[apiEndpoint]]/entries"
+      handle-as="json"
+      on-response="handleAddEntryResponse"
+      debounce-duration="300">
+    </iron-ajax>
 
     <app-drawer-layout fullbleed>
       <!-- Drawer content -->
       <app-drawer id="drawer" slot="drawer">
-        <app-toolbar>Menu</app-toolbar>
-        <iron-selector selected="[[page]]" attr-for-selected="name" class="drawer-list" role="navigation">
-          
-          <a name="home" href="home">Home</a>
-          <a name="view1" href="view1">View One</a>
-
-        </iron-selector>
-
-        <my-dynamic-menu page="[[page]]"></my-dynamic-menu>
-        
+        <app-toolbar>
+          <iron-image id="logo" style="width:100%; height:100%;" sizing="contain" src="../images/logo.png" on-click="routeHome"></iron-image>
+        </app-toolbar>
+        <div style="height: 100%; overflow: auto; margin-top: 3em;">
+          <my-dynamic-menu 
+            page="[[page]]" 
+            entries="{{entries}}" 
+            on-add-journal="openJournalDialog"
+            on-add-entry="openEntryDialog">
+          </my-dynamic-menu>
+        </div>
       </app-drawer>
 
       <!-- Main content -->
@@ -98,7 +157,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         <app-header slot="header" condenses reveals effects="waterfall">
           <app-toolbar>
             <paper-icon-button icon="my-icons:menu" drawer-toggle></paper-icon-button>
-            <div main-title>Diarium</div>
+            <a href="{{titleLink}}" class="app-header-link">
+              <div main-title>{{title}}</iron-icon></div>
+            </a>
           </app-toolbar>
         </app-header>
 
@@ -109,14 +170,33 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           role="main">
 
           <my-view1 name="view1"></my-view1>
-
-          <my-home-view name="home"></my-home-view>
-          <my-journal-view name="journal" route="{{subroute}}"></my-journal-view>
+          <my-home-view name="home" journals="{{journals}}"></my-home-view>
+          <my-journal-view name="journal" entries="{{entries}}"></my-journal-view>
+          <my-entry-view name="entry" on-setentry="setEntry" entry="{{entry}}"></my-entry-view>
+          <my-entryedit-view name="entryedit" on-setentry="setEntry" on-saveentry="saveEntry" entry={{entry}}></my-entryedit-view>
           <my-view404 name="view404"></my-view404>
 
         </iron-pages>
       </app-header-layout>
     </app-drawer-layout>
+
+    <paper-dialog id="dialog">
+      <h2>Create New Journal</h2>     
+      <paper-input id="nameInput" label="Journal Name"></paper-input>
+      <div class="buttons">
+        <paper-button dialog-dismiss>Cancel</paper-button>
+        <paper-button dialog-confirm autofocus on-click="addJournal">Create</paper-button>
+      </div>
+    </paper-dialog>
+
+    <paper-dialog id="entryDialog">
+      <h2>Create New Entry</h2>     
+      <paper-input id="entryNameInput" label="Entry Name"></paper-input>
+      <div class="buttons">
+        <paper-button dialog-dismiss>Cancel</paper-button>
+        <paper-button dialog-confirm autofocus on-click="addEntry">Create</paper-button>
+      </div>
+    </paper-dialog>
 
   <!-- end structural content-->  
   </template>
@@ -128,6 +208,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
       static get properties() {
         return {
+          apiEndpoint: {
+            type: String,
+            value: appConfig.apiEndpoint
+          },
           page: {
             type: String,
             reflectToAttribute: true,
@@ -136,6 +220,12 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           rootPattern: String,
           routeData: Object,
           subroute: String,
+          journals: Array,
+          activeJournal: Object,
+          entries: Array,
+          entry: Object,
+          title: String,
+          titleLink: String,
         };
       }
 
@@ -147,12 +237,119 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
       constructor() {
         super();
-
         // Get root pattern for app-route, for more info about `rootPath` see:
         // https://www.polymer-project.org/2.0/docs/upgrade#urls-in-templates
         this.rootPattern = (new URL(this.rootPath)).pathname;
       }
 
+      openJournalDialog() {
+        this.$.dialog.open();
+      }
+
+      openEntryDialog() {
+        this.$.entryDialog.open();
+      }
+
+      addJournal() {
+        var name = this.$.nameInput.value;
+        this.$.nameInput.value = "";
+
+        var request = this.$.ajaxAddJournalRequest;
+        request.body = JSON.stringify({name: name, img_url: ""});
+        request.generateRequest();
+      }
+
+      addEntry() {
+        var name = this.$.entryNameInput.value;
+        this.$.entryNameInput.value = "";
+
+        var request = this.$.ajaxAddEntryRequest;
+        request.body = JSON.stringify({name: name, content: "", journal: this.activeJournal._id});
+        request.generateRequest();
+      }
+      
+      setEntry(event) {
+        var requestedId = event.detail.entryId;
+        this.$.ajaxEntryRequest.url = this.apiEndpoint + "/entries/" + requestedId;
+        this.$.ajaxEntryRequest.generateRequest();
+      }
+
+      setInitialEntries() {
+        if(this.entries === undefined) {
+          this.$.ajaxEntriesRequest.url = this.apiEndpoint + "/entries/journal/" + this.entry.journal;
+          this.$.ajaxEntriesRequest.generateRequest();
+          // reset url for further use
+          this.$.ajaxEntriesRequest.url="[[apiEndpoint]]/entries/journal{{subroute.path}}"
+        }
+      }
+
+      saveEntry(event) {
+        this.$.ajaxSaveEntryRequest.url = this.apiEndpoint + "/entries/" + event.detail.entry._id;
+        this.$.ajaxSaveEntryRequest.body = JSON.stringify(event.detail.entry);
+        this.$.ajaxSaveEntryRequest.generateRequest();
+      }
+
+      handleSaveEntryResponse(data) {
+        // update entries list
+        var entryToUpdate = this.entries.find(entry => entry._id === this.entry._id);
+        this.set('entries.' + this.entries.indexOf(entryToUpdate), this.entry)
+        this.set('route.path', '/entry/' + this.entry._id);
+        this.set('entry', data.detail.response);
+      }
+
+      handleJournalListResponse(data) {
+        this.journals = data.detail.response; 
+        if(this.page == 'journal') {
+          this.setActiveJournal(this.subroute.path.substring(1));
+          this.updateTitle();
+        }
+      }
+
+      handleEntryListResponse(data) {
+        this.entries = data.detail.response;
+      }
+
+      handleEntryResponse(data) {
+        this.entry = data.detail.response;
+        this.setInitialEntries();
+      }
+
+      handleAddJournalResponse(data) {
+        this.push('journals', data.detail.response);
+        this.set('route.path', '/journal/' + data.detail.response._id);
+      }
+
+      handleAddEntryResponse(data) {
+        this.push('entries', data.detail.response);
+        this.entry = data.detail.response;
+        this.set('route.path', '/entryedit/' + data.detail.response._id);
+      }
+
+      setActiveJournal(journalId) {
+        if(this.journals != undefined) {
+          this.activeJournal = this.journals.find(journal => journal._id === journalId);
+        }
+      }
+
+      routeHome() {
+        this.set('route.path', 'home');
+      }
+
+      updateTitle() {
+        switch(this.page) {
+          case 'home':
+            this.title = 'Home';
+            this.titleLink = "home";
+            break;
+          case 'journal':
+            if(this.activeJournal != undefined) {
+              this.title = 'Journal: ' + this.activeJournal.name;
+              this.titleLink = "journal/" + this.activeJournal._id;
+            }
+            break;
+        }
+      }
+      
       _routePageChanged(page) {
         // Polymer 2.0 will call with `undefined` on initialization.
         // Ignore until we are properly called with a string.
@@ -168,6 +365,22 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         if (!this.$.drawer.persistent) {
           this.$.drawer.close();
         }
+        
+        // Fire Ajax Request for corresponding entries when we change to the journal view
+        if(page=='journal') {
+          //use last request to not fire same request again?
+          var request = this.$.ajaxEntriesRequest.generateRequest();
+          this.setActiveJournal(this.subroute.path.substring(1));
+        }
+        // Fire Ajax Request to get the specific entry on the entry view
+        if(page=='entry') {
+          if (this.entries != undefined) {
+            var requestedId = this.subroute.path.substring(1);
+            this.entry = this.entries.find(entry => entry._id===requestedId);
+          }
+        }
+
+        this.updateTitle();
       }
 
       _pageChanged(page) {

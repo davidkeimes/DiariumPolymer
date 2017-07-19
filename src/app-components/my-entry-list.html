@@ -1,0 +1,38 @@
+<link rel="import" href="../../bower_components/polymer/polymer-element.html">
+<link rel="import" href="../shared-styles.html">
+
+<dom-module id="my-entry-list">
+  <template>
+    <style include="shared-styles">
+      :host {
+        display: block;
+
+        padding: 10px;
+      }
+    </style>
+
+    <template is="dom-repeat" items="{{entries}}">
+      <a name="entry" href="entry/[[item._id]]">
+        <div class="card">
+          <span>[[index]] Eintrag</span> 
+          <span>"[[item.name]]"</span> vom 
+          <span>[[item.created_date]]</span>
+        </div>
+      </a>
+    </template> 
+  </template>
+
+  <script>
+    class MyEntryList extends Polymer.Element {
+      static get is() { return 'my-entry-list'; }
+
+      static get properties() {
+        return {
+          entries: Array
+        };
+      }
+    }
+
+    window.customElements.define(MyEntryList.is, MyEntryList);
+  </script>
+</dom-module>
