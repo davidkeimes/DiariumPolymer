@@ -35,8 +35,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
   <template>
     <style>
       :host {
-        --app-primary-color: #4285f4;
-        --app-secondary-color: black;
+        --app-primary-color: #3F51B5;
+        --app-secondary-color: #673AB7;
 
         display: block;
       }
@@ -70,6 +70,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       }
       #logo {
         margin-top: 2em;
+
         cursor: pointer;
       }
     </style>
@@ -83,7 +84,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       tail="{{subroute}}">
     </app-route>
     
+    <!-- JOURNAL API CALLS -->
     <iron-ajax
+      id="ajaxJournalsRequest"
       auto
       url="[[apiEndpoint]]/journals"
       handle-as="json"
@@ -91,6 +94,28 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       debounce-duration="300">
     </iron-ajax>
 
+    <iron-ajax
+      id="ajaxAddJournalRequest"
+      method="POST" 
+      content-type="application/json"
+      url="[[apiEndpoint]]/journals"
+      handle-as="json"
+      on-response="handleAddJournalResponse"
+      debounce-duration="300">
+    </iron-ajax>
+    
+    <iron-ajax
+      id="ajaxSearchJournalRequest"
+      method="POST" 
+      content-type="application/json"
+      url="[[apiEndpoint]]/journals/search"
+      handle-as="json"
+      on-response="handleSearchJournalResponse"
+      debounce-duration="300">
+    </iron-ajax>
+    <!-- END JOURNAL API CALLS -->
+
+    <!-- ENTRY API CALLS -->
     <iron-ajax
       id="ajaxEntriesRequest"
       url="[[apiEndpoint]]/entries/journal{{subroute.path}}"
@@ -107,25 +132,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     </iron-ajax>
 
     <iron-ajax
-      id="ajaxSaveEntryRequest"
-      method="PUT"
-      content-type="application/json"
-      handle-as="json"
-      on-response="handleSaveEntryResponse"
-      debounce-duration="300">
-    </iron-ajax>
-
-    <iron-ajax
-      id="ajaxAddJournalRequest"
-      method="POST" 
-      content-type="application/json"
-      url="[[apiEndpoint]]/journals"
-      handle-as="json"
-      on-response="handleAddJournalResponse"
-      debounce-duration="300">
-    </iron-ajax>
-
-    <iron-ajax
       id="ajaxAddEntryRequest"
       method="POST" 
       content-type="application/json"
@@ -135,13 +141,44 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       debounce-duration="300">
     </iron-ajax>
 
+    <iron-ajax
+      id="ajaxSaveEntryRequest"
+      method="PUT"
+      content-type="application/json"
+      handle-as="json"
+      on-response="handleSaveEntryResponse"
+      debounce-duration="300">
+    </iron-ajax>
+
+     <iron-ajax
+      id="ajaxSearchEntryRequest"
+      method="POST" 
+      content-type="application/json"
+      url="[[apiEndpoint]]/entries/search"
+      handle-as="json"
+      on-response="handleSearchEntryResponse"
+      debounce-duration="300">
+    </iron-ajax>
+    <!-- END ENTRY API CALLS -->
+
     <app-drawer-layout fullbleed>
       <!-- Drawer content -->
       <app-drawer id="drawer" slot="drawer">
         <app-toolbar>
           <iron-image id="logo" style="width:100%; height:100%;" sizing="contain" src="../images/logo.png" on-click="routeHome"></iron-image>
         </app-toolbar>
-        <div style="height: 100%; overflow: auto; margin-top: 3em;">
+
+        <div>
+          <paper-input 
+            id="searchInput" 
+            on-keyup="onSearchKeyPress"
+            label="Search"
+            style="width: 80%; margin: auto; margin-top: 3em;">
+            <iron-icon icon="search" slot="suffix"></iron-icon>
+          </paper-input>
+        </div>
+
+        <div style="height: 100%; overflow: auto; margin-top: 2em;">
           <my-dynamic-menu 
             page="[[page]]" 
             entries="{{entries}}" 
@@ -226,6 +263,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           entry: Object,
           title: String,
           titleLink: String,
+          debouncer: Object
         };
       }
 
@@ -342,6 +380,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             this.titleLink = "home";
             break;
           case 'journal':
+          case 'entry':
+          case 'entryedit':
             if(this.activeJournal != undefined) {
               this.title = 'Journal: ' + this.activeJournal.name;
               this.titleLink = "journal/" + this.activeJournal._id;
@@ -349,7 +389,46 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             break;
         }
       }
+
+      onSearchKeyPress(e) {
+        this.debouncer = Polymer.Debouncer.debounce(this.debouncer,
+        Polymer.Async.timeOut.after(300),
+        () => { 
+          switch(this.page) {
+            case 'home':
+              this.searchJournals();
+              break;
+            case 'journal':
+            case 'entry':
+            case 'entryedit':
+              this.searchEntries();
+              break;
+          }
+        });
+      }
+
+      searchJournals() {
+        var searchValue = this.$.searchInput.value;
+        this.$.ajaxSearchJournalRequest.body = JSON.stringify({search: searchValue});
+        this.$.ajaxSearchJournalRequest.generateRequest();
+        console.log(this.$.searchInput.value);
+      }
+
+      handleSearchJournalResponse(data) {
+        this.journals = data.detail.response;
+      }
       
+      searchEntries() {
+        var searchValue = this.$.searchInput.value;
+        this.$.ajaxSearchEntryRequest.body = JSON.stringify({search: searchValue, journal: this.activeJournal._id});
+        this.$.ajaxSearchEntryRequest.generateRequest();
+        console.log(this.$.searchInput.value);
+      }
+
+      handleSearchEntryResponse(data) {
+        this.entries = data.detail.response;
+      }
+
       _routePageChanged(page) {
         // Polymer 2.0 will call with `undefined` on initialization.
         // Ignore until we are properly called with a string.
@@ -372,7 +451,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           var request = this.$.ajaxEntriesRequest.generateRequest();
           this.setActiveJournal(this.subroute.path.substring(1));
         }
-        // Fire Ajax Request to get the specific entry on the entry view
+        // change selected entry
         if(page=='entry') {
           if (this.entries != undefined) {
             var requestedId = this.subroute.path.substring(1);
