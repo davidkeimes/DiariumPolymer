@@ -1,5 +1,6 @@
 <link rel="import" href="../../bower_components/polymer/polymer-element.html">
 <link rel="import" href="../shared-styles.html">
+<link rel="import" href="../app-components/my-journal-card-list.html">
 
 <dom-module id="my-home-view">
   <template>
@@ -17,15 +18,7 @@
       data="{{routeData}}">
     </app-route>
 
-    <template is="dom-repeat" items="{{journals}}">
-      <a name="journal" href="journal/[[item._id]]">
-        <div class="card">
-          <p>[[item.name]]</p>
-          <p>[[item.content]]</p>
-        </div>
-      </a>
-    </template>
-  
+    <my-journal-card-list journals="[[journals]]"></my-journal-card-list>
   </template>
 
   <script>

@@ -1,0 +1,39 @@
+<link rel="import" href="../../bower_components/polymer/polymer-element.html">
+<link rel="import" href="../shared-styles.html">
+<link rel="import" href="./my-journal-card.html">
+<link rel="import" href="../../bower_components/iron-flex-layout/iron-flex-layout-classes.html">
+
+<dom-module id="my-journal-card-list">
+  <template>
+    <style include="shared-styles iron-flex iron-flex-alignment">
+       :host {
+        display: block;
+
+        padding: 10px;
+      }
+      .card-container {
+        margin: auto;
+      }
+    </style>
+
+    <div class="card-container layout horizontal wrap">
+      <template is="dom-repeat" items="{{journals}}">
+        <my-journal-card journal="[[item]]"></my-journal-card>
+      </template>
+    </div>
+  </template>
+
+  <script>
+    class MyJournalCardList extends Polymer.Element {
+      static get is() { return 'my-journal-card-list'; }
+
+      static get properties()  {
+        return {
+          journals: Array
+        };
+      }
+    }
+
+    window.customElements.define(MyJournalCardList.is, MyJournalCardList);
+  </script>
+</dom-module>

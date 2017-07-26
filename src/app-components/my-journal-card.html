@@ -1,0 +1,55 @@
+<link rel="import" href="../../bower_components/polymer/polymer-element.html">
+<link rel="import" href="../../bower_components/paper-card/paper-card.html">
+<link rel="import" href="../../bower_components/iron-image/iron-image.html">
+<link rel="import" href="../shared-styles.html">
+
+<dom-module id="my-journal-card">
+  <template>
+    <style include="shared-styles">
+       :host {
+        display: block;
+
+        padding: 10px;
+      }
+      .card-header { 
+        @apply --paper-font-headline; 
+        color: black;
+      }
+      .card-date {
+        color: #757575;
+      }
+      paper-card {
+        width: 400px;
+        height: 300px;
+      }
+    </style>
+
+    <a name="journal" href="journal/[[journal._id]]">
+      <paper-card alt="Journal Background Image">
+        <div class="card-content">
+          <iron-image src="[[journal.img_url]]" style="width:368px; height:200px;" sizing="cover"></iron-image>
+          <div class="card-header">
+            [[journal.name]]
+          </div>
+          <div class="card-date">
+            created at [[journal.created_date]]
+          </div>
+        </div>
+      </paper-card>
+    </a>
+  </template>
+
+  <script>
+    class MyJournalCard extends Polymer.Element {
+      static get is() { return 'my-journal-card'; }
+
+      static get properties() {
+        return {
+          journal: Object
+        };
+      }
+    }
+
+    window.customElements.define(MyJournalCard.is, MyJournalCard);
+  </script>
+</dom-module>

@@ -11,13 +11,12 @@
     <style include="shared-styles">
       :host {
         display: block;
-
         padding: 10px;
       }
       paper-fab {
-        position: fixed;
-        right: 50px;
-        top: 115px;   
+        position: absolute;
+        right: 150px;
+        top: 80px;   
         z-index: 1000;
         --paper-fab-background: var(--app-secondary-color);
         --paper-fab-keyboard-focus-background: var(--app-secondary-color);     
@@ -32,6 +31,8 @@
 
     <paper-fab on-click="setRoute" icon="create"></paper-fab>
     <div class="card">
+      <h1 style="margin-bottom: 0px;">[[entry.name]]</h1>
+      <h6 style="margin-top: 0px;">created on [[entry.created_date]]</h3>
       <div class="ql-container ql-snow">
         <div id="entryContent" class="ql-editor"></div>
       </div>
@@ -58,6 +59,10 @@
         if(this.entry === undefined) {
           var entryId = this.route.path.substring(7);
           this.dispatchEvent(new CustomEvent('setentry', { detail: {entryId: entryId} }));
+        }
+        // set welcome message or something
+        if(this.entry !== undefined && this.entry.content.length === 0) {
+
         }
       }
       

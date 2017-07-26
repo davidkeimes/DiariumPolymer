@@ -1,25 +1,47 @@
 <link rel="import" href="../../bower_components/polymer/polymer-element.html">
 <link rel="import" href="../shared-styles.html">
+<link rel="import" href="../../bower_components/paper-item/paper-item.html">
+<link rel="import" href="../../bower_components/paper-item/paper-item-body.html">
 
 <dom-module id="my-entry-list">
   <template>
     <style include="shared-styles">
       :host {
         display: block;
-
         padding: 10px;
+      }
+      a {
+        text-decoration: none;
+      }
+      .entry-name {
+        color: black;
+      }
+      .entry-container {
+        background-color: white;
+      }
+      .entry {
+        margin: auto;
       }
     </style>
 
-    <template is="dom-repeat" items="{{entries}}">
-      <a name="entry" href="entry/[[item._id]]">
-        <div class="card">
-          <span>[[index]] Eintrag</span> 
-          <span>"[[item.name]]"</span> vom 
-          <span>[[item.created_date]]</span>
-        </div>
-      </a>
-    </template> 
+    <div class="entry-container" role="listbox">
+      <template is="dom-repeat" items="{{entries}}">
+        <a name="entry" href="entry/[[item._id]]">
+          <template is="dom-if" if="{{big}}">
+            <paper-item>
+              <paper-item-body two-line>
+                <div class="entry-name">[[item.name]]</div>
+                <div secondary>Entry #[[index]] from the [[item.created_date]]</div>
+              </paper-item-body>
+            </paper-item>
+          </template>
+          <template is="dom-if" if="{{!big}}">
+            <paper-item class="entry-name">[[item.name]]</paper-item>
+          </template>
+        </a>
+        <paper-divider></paper-divider>
+      </template> 
+    </div>
   </template>
 
   <script>
@@ -28,7 +50,11 @@
 
       static get properties() {
         return {
-          entries: Array
+          entries: Array,
+          big: {
+            type: Boolean,
+            value: false,
+          }
         };
       }
     }

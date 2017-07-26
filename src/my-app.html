@@ -25,6 +25,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="../bower_components/paper-input/paper-input.html">
 <link rel="import" href="../bower_components/iron-image/iron-image.html">
 <link rel="import" href="my-icons.html">
+<link rel="import" href="../bower_components/paper-divider/paper-divider.html">
 
 <link rel="import" href="../bower_components/iron-ajax/iron-ajax.html">
 
@@ -70,8 +71,18 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       }
       #logo {
         margin-top: 2em;
-
         cursor: pointer;
+      }
+      .content-switch {
+        max-width: 900px;
+        margin: auto;
+      }
+      paper-dialog {
+        width: 600px;
+      }
+      .dialog-icon {
+        margin-right: 1em;
+        color: #757575;
       }
     </style>
 
@@ -167,7 +178,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         <app-toolbar>
           <iron-image id="logo" style="width:100%; height:100%;" sizing="contain" src="../images/logo.png" on-click="routeHome"></iron-image>
         </app-toolbar>
-
         <div>
           <paper-input 
             id="searchInput" 
@@ -177,7 +187,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             <iron-icon icon="search" slot="suffix"></iron-icon>
           </paper-input>
         </div>
-
         <div style="height: 100%; overflow: auto; margin-top: 2em;">
           <my-dynamic-menu 
             page="[[page]]" 
@@ -204,7 +213,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           selected="[[page]]"
           attr-for-selected="name"
           fallback-selection="view404"
-          role="main">
+          role="main"
+          class="content-switch">
 
           <my-view1 name="view1"></my-view1>
           <my-home-view name="home" journals="{{journals}}"></my-home-view>
@@ -218,8 +228,13 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     </app-drawer-layout>
 
     <paper-dialog id="dialog">
-      <h2>Create New Journal</h2>     
-      <paper-input id="nameInput" label="Journal Name"></paper-input>
+      <h2>Create a new Journal</h2>     
+      <paper-input id="nameInput" label="Journal Name">
+        <iron-icon class="dialog-icon" slot="prefix" icon="subject"></iron-icon>
+      </paper-input>
+      <paper-input id="urlInput" label="Background Image Url">
+        <iron-icon class="dialog-icon" slot="prefix" icon="camera-enhance"></iron-icon>
+      </paper-input>
       <div class="buttons">
         <paper-button dialog-dismiss>Cancel</paper-button>
         <paper-button dialog-confirm autofocus on-click="addJournal">Create</paper-button>
@@ -227,7 +242,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     </paper-dialog>
 
     <paper-dialog id="entryDialog">
-      <h2>Create New Entry</h2>     
+      <h2>Create a new Entry</h2>     
       <paper-input id="entryNameInput" label="Entry Name"></paper-input>
       <div class="buttons">
         <paper-button dialog-dismiss>Cancel</paper-button>
