@@ -18,7 +18,7 @@
       data="{{routeData}}">
     </app-route>
 
-    <my-journal-card-list journals="[[journals]]"></my-journal-card-list>
+    <my-journal-card-list journals="[[journals]]" on-delete-journal="handleDeleteClick"></my-journal-card-list>
   </template>
 
   <script>
@@ -31,6 +31,10 @@
           routeData: Object,
           journals: Array,
         }
+      }
+
+      handleDeleteClick(e) {
+        this.dispatchEvent(new CustomEvent('delete-journal', {detail: {journal: e.detail.journal}}));
       }
     }
 

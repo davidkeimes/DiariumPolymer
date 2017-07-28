@@ -124,6 +124,13 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       on-response="handleSearchJournalResponse"
       debounce-duration="300">
     </iron-ajax>
+
+    <iron-ajax
+      id="ajaxDeleteJournalRequest"
+      method="DELETE" 
+      on-response="handleDeleteJournalResponse"
+      debounce-duration="300">
+    </iron-ajax>
     <!-- END JOURNAL API CALLS -->
 
     <!-- ENTRY API CALLS -->
@@ -170,6 +177,13 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       on-response="handleSearchEntryResponse"
       debounce-duration="300">
     </iron-ajax>
+
+    <iron-ajax
+      id="ajaxDeleteEntryRequest"
+      method="DELETE" 
+      on-response="handleDeleteEntryResponse"
+      debounce-duration="300">
+    </iron-ajax>
     <!-- END ENTRY API CALLS -->
 
     <app-drawer-layout fullbleed>
@@ -183,11 +197,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             id="searchInput" 
             on-keyup="onSearchKeyPress"
             label="Search"
-            style="width: 80%; margin: auto; margin-top: 3em;">
+            style="width: 80%; margin: auto; margin-top: 2.5em;">
             <iron-icon icon="search" slot="suffix"></iron-icon>
           </paper-input>
         </div>
-        <div style="height: 100%; overflow: auto; margin-top: 2em;">
+        <div style="height: 100%; overflow: auto; margin-top: 1em;">
           <my-dynamic-menu 
             page="[[page]]" 
             entries="{{entries}}" 
@@ -217,8 +231,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           class="content-switch">
 
           <my-view1 name="view1"></my-view1>
-          <my-home-view name="home" journals="{{journals}}"></my-home-view>
-          <my-journal-view name="journal" entries="{{entries}}"></my-journal-view>
+          <my-home-view name="home" journals="{{journals}}" on-delete-journal="handleJournalDeleteClick"></my-home-view>
+          <my-journal-view name="journal" entries="{{entries}}" on-delete-entry="handleEntryDeleteClick"></my-journal-view>
           <my-entry-view name="entry" on-setentry="setEntry" entry="{{entry}}"></my-entry-view>
           <my-entryedit-view name="entryedit" on-setentry="setEntry" on-saveentry="saveEntry" entry={{entry}}></my-entryedit-view>
           <my-view404 name="view404"></my-view404>
@@ -278,7 +292,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           entry: Object,
           title: String,
           titleLink: String,
-          debouncer: Object
+          debouncer: Object,
+          jToDelete: Object,
+          eToDelete: Object
         };
       }
 
@@ -307,8 +323,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         var name = this.$.nameInput.value;
         this.$.nameInput.value = "";
 
+        var url = this.$.urlInput.value;
+        this.$.urlInput.value = "";
+
         var request = this.$.ajaxAddJournalRequest;
-        request.body = JSON.stringify({name: name, img_url: ""});
+        request.body = JSON.stringify({name: name, img_url: url});
         request.generateRequest();
       }
 
@@ -442,6 +461,28 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
       handleSearchEntryResponse(data) {
         this.entries = data.detail.response;
+      }
+
+      handleJournalDeleteClick(e) {
+        this.$.ajaxDeleteJournalRequest.url = this.apiEndpoint + "/journals/" + e.detail.journal._id;
+        this.$.ajaxDeleteJournalRequest.generateRequest();
+        this.jToDelete = e.detail.journal._id;
+      }
+      
+      handleEntryDeleteClick(e) {
+        this.$.ajaxDeleteEntryRequest.url = this.apiEndpoint + "/entries/" + e.detail.entry._id;
+        this.$.ajaxDeleteEntryRequest.generateRequest();
+        this.eToDelete = e.detail.entry._id;
+      }
+
+      handleDeleteJournalResponse(data) {
+        let toDelete = this.journals.find(journal => journal._id === this.jToDelete._id);
+        this.splice('journals', this.journals.indexOf(toDelete), 1);
+      }
+
+      handleDeleteEntryResponse(data) {
+        let toDelete = this.entries.find(entry => entry._id === this.eToDelete._id);
+        this.splice('entries', this.entries.indexOf(toDelete), 1);
       }
 
       _routePageChanged(page) {

@@ -18,7 +18,7 @@
 
     <div class="card-container layout horizontal wrap">
       <template is="dom-repeat" items="{{journals}}">
-        <my-journal-card journal="[[item]]"></my-journal-card>
+        <my-journal-card journal="[[item]]" on-delete-journal="handleDeleteClick"></my-journal-card>
       </template>
     </div>
   </template>
@@ -31,6 +31,10 @@
         return {
           journals: Array
         };
+      }
+
+      handleDeleteClick(e) {
+        this.dispatchEvent(new CustomEvent('delete-journal', {detail: {journal: e.detail.journal}}));
       }
     }
 

@@ -15,7 +15,8 @@
       }
       paper-button {
         width: 100%;
-        padding-right: 2.5em;
+        padding-right: 2.75em;
+        color: #3F51B5;
       }
     </style>
     
@@ -26,18 +27,18 @@
       role="main">
 
       <div id="onHomeContainer" name="home">
-        <paper-button on-click="addJournal"><iron-icon icon="add"></iron-icon>&nbsp;&nbsp;New Journal</paper-button>
+        <paper-button on-click="addJournal"><iron-icon icon="add"></iron-icon><span>&nbsp;&nbsp;Journal</span></paper-button>
       </div>
       <div id="onJournalContainer" name="journal">
-        <paper-button on-click="addEntry"><iron-icon icon="add"></iron-icon>&nbsp;&nbsp;New Entry</paper-button>
+        <paper-button on-click="addEntry"><iron-icon icon="add"></iron-icon>&nbsp;&nbsp;Entry</paper-button>
         <my-entry-list entries="{{entries}}"></my-entry-list>
       </div>
       <div id="onEntryContainer" name="entry">
-        <paper-button on-click="addEntry"><iron-icon icon="add"></iron-icon>&nbsp;&nbsp;New Entry</paper-button>
+        <paper-button on-click="addEntry"><iron-icon icon="add"></iron-icon>&nbsp;&nbsp;Entry</paper-button>
         <my-entry-list entries="{{entries}}"></my-entry-list>
       </div>
       <div id="onEditorContainer" name="entryedit">
-        <paper-button on-click="addEntry"><iron-icon icon="add"></iron-icon>&nbsp;&nbsp;New Entry</paper-button>
+        <paper-button on-click="addEntry"><iron-icon icon="add"></iron-icon>&nbsp;&nbsp;Entry</paper-button>
         <my-entry-list entries="{{entries}}"></my-entry-list>
       </div>
     </iron-pages>

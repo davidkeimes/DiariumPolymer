@@ -22,17 +22,23 @@
         width: 400px;
         height: 300px;
       }
+      iron-icon {
+        color: #BDBDBD;
+        margin-left: 4em; 
+        padding-bottom: 0.5em;
+      }
     </style>
 
     <a name="journal" href="journal/[[journal._id]]">
       <paper-card alt="Journal Background Image">
+        <iron-image src="[[journal.img_url]]" style="width:400px; height:200px;" sizing="cover"></iron-image>
         <div class="card-content">
-          <iron-image src="[[journal.img_url]]" style="width:368px; height:200px;" sizing="cover"></iron-image>
           <div class="card-header">
             [[journal.name]]
           </div>
           <div class="card-date">
             created at [[journal.created_date]]
+            <iron-icon icon="delete" on-click="handleDeleteClick"></iron-icon>
           </div>
         </div>
       </paper-card>
@@ -47,6 +53,11 @@
         return {
           journal: Object
         };
+      }
+
+      handleDeleteClick(e) {
+        e.preventDefault();
+        this.dispatchEvent(new CustomEvent('delete-journal', {detail: {journal: this.journal}}));
       }
     }
 

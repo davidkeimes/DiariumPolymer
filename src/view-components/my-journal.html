@@ -12,7 +12,7 @@
       }
     </style>
 
-    <my-entry-list big entries="{{entries}}"></my-entry-list>
+    <my-entry-list big entries="{{entries}}" on-delete-entry="handleDeleteClick"></my-entry-list>
   </template>
 
   <script>
@@ -23,6 +23,10 @@
         return {
           entries: Array
         };
+      }
+
+      handleDeleteClick(e) {
+        this.dispatchEvent(new CustomEvent('delete-entry', {detail: {entry: e.detail.entry}}));
       }
     }
 

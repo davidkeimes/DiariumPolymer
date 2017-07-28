@@ -22,6 +22,10 @@
       .entry {
         margin: auto;
       }
+      iron-icon {
+        color: #BDBDBD;
+        margin-left: 35em;
+      }
     </style>
 
     <div class="entry-container" role="listbox">
@@ -33,6 +37,7 @@
                 <div class="entry-name">[[item.name]]</div>
                 <div secondary>Entry #[[index]] from the [[item.created_date]]</div>
               </paper-item-body>
+              <iron-icon icon="delete" on-click="handleDeleteClick" data-entry$="{{item}}"></iron-icon>
             </paper-item>
           </template>
           <template is="dom-if" if="{{!big}}">
@@ -56,6 +61,12 @@
             value: false,
           }
         };
+      }
+
+      handleDeleteClick(e) {
+        e.preventDefault();
+        let entry = JSON.parse(e.target.dataset.entry);
+        this.dispatchEvent(new CustomEvent('delete-entry', {detail: {entry: entry}}));
       }
     }
 
